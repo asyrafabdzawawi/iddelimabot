@@ -29,7 +29,7 @@ service_account_info = json.loads(
     os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]
 )
 
-creds = ServiceAccountCredentials.from_json_keyfile_dict(
+creds = ServiceAccountCredentials.from_json_keyfile_dict(	
     service_account_info, scope
 )
 
