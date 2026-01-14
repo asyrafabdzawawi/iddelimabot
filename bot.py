@@ -47,7 +47,7 @@ user_waiting_pin = set()
 # KEYBOARD BUTTON
 # ======================
 start_keyboard = ReplyKeyboardMarkup(
-    [["🔍 SEMAK PIN"]],
+    [["🔍 SEMAK ID"]],
     resize_keyboard=True
 )
 
