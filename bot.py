@@ -1,6 +1,6 @@
 import os
 import json
-from telegram import Update
+from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
     CommandHandler,
@@ -44,13 +44,23 @@ sheet = client.open_by_key(
 user_waiting_pin = set()
 
 # ======================
-# /start
+# KEYBOARD BUTTON
+# ======================
+start_keyboard = ReplyKeyboardMarkup(
+    [["🔍 SEMAK PIN"]],
+    resize_keyboard=True
+)
+
+# ======================
+# /start ATAU BUTANG
 # ======================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_waiting_pin.add(update.effective_user.id)
+
     await update.message.reply_text(
         "👋 Assalamualaikum.\n"
-        "Sila masukkan PIN anda:"
+        "Sila masukkan PIN anda:",
+        reply_markup=start_keyboard
     )
 
 # ======================
@@ -58,27 +68,36 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 # ======================
 async def terima_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
+    text = update.message.text.strip()
+
+    # Jika tekan butang SEMAK PIN
+    if text == "🔍 SEMAK PIN":
+        user_waiting_pin.add(user_id)
+        await update.message.reply_text(
+            "Sila masukkan PIN anda:",
+            reply_markup=start_keyboard
+        )
+        return
 
     if user_id not in user_waiting_pin:
         return
 
-    pin = update.message.text.strip()
+    pin = text
     data = sheet.get_all_records()
 
     matched_rows = []
 
-    # Cari SEMUA murid dengan PIN sama
+    # Cari SEMUA murid dengan PIN sama (support 0 depan)
     for row in data:
         if str(row["PIN"]).strip().zfill(len(pin)) == pin:
             matched_rows.append(row)
 
-    # Jika ada padanan
+    # Jika jumpa
     if matched_rows:
         user_waiting_pin.remove(user_id)
 
         message = "✅ Pengesahan berjaya\n\n"
 
-        # Papar setiap murid (format asal, diulang)
         for row in matched_rows:
             message += (
                 f"👤 Nama: {row['NAMA MURID']}\n"
@@ -86,18 +105,21 @@ async def terima_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"📧 ID DELIMa: {row['ID DELIMA']}\n\n"
             )
 
-        # Jika PIN dikongsi
         if len(matched_rows) > 1:
             message += (
                 f"⚠️ PIN ini dikongsi oleh {len(matched_rows)} orang murid."
             )
 
-        await update.message.reply_text(message)
+        await update.message.reply_text(
+            message,
+            reply_markup=start_keyboard
+        )
         return
 
-    # Jika tiada padanan
+    # Jika PIN tidak sah
     await update.message.reply_text(
-        "❌ PIN tidak sah.\nSila cuba lagi."
+        "❌ PIN tidak sah.\nSila cuba lagi.",
+        reply_markup=start_keyboard
     )
 
 # ======================
