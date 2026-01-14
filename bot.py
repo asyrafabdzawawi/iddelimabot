@@ -71,7 +71,7 @@ async def terima_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     text = update.message.text.strip()
 
     # Jika tekan butang SEMAK PIN
-    if text == "🔍 SEMAK PIN":
+    if text == "🔍 SEMAK ID":
         user_waiting_pin.add(user_id)
         await update.message.reply_text(
             "Sila masukkan PIN anda:",
