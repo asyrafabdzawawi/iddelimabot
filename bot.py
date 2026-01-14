@@ -65,19 +65,39 @@ async def terima_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     pin = update.message.text.strip()
     data = sheet.get_all_records()
 
+    # Cari semua murid yang guna PIN sama
+    matched_rows = []
     for row in data:
-         if str(row["PIN"]).strip().zfill(len(pin)) == pin:
-            user_waiting_pin.remove(user_id)
-            await update.message.reply_text(
-                "✅ Pengesahan berjaya\n\n"
-                f"👤 Nama: {row['NAMA MURID']}\n"
-                f"🏫 Kelas: {row['KELAS']}\n"
-                f"📧 ID DELIMa: {row['ID DELIMA']}"
-            )
-            return
+        if str(row["PIN"]).strip() == pin:
+            matched_rows.append(row)
 
+    # Jika jumpa
+    if matched_rows:
+        user_waiting_pin.remove(user_id)
+
+        message = "✅ Pengesahan berjaya\n\n"
+
+        # Papar setiap murid (format sama, berulang)
+        for row in matched_rows:
+            message += (
+                f"👤 Nama: {row['NAMA MURID']}\n"
+                f"🏫 Kelas: {row['Kelas']}\n"
+                f"📧 ID DELIMa: {row['ID DELIMA']}\n\n"
+            )
+
+        # Jika PIN dikongsi
+        if len(matched_rows) > 1:
+            message += (
+                f"⚠️ PIN ini dikongsi oleh {len(matched_rows)} orang murid."
+            )
+
+        await update.message.reply_text(message)
+        return
+
+    # Jika PIN tidak sah
     await update.message.reply_text(
-        "❌ PIN tidak sah.\nSila cuba lagi."
+        "❌ PIN tidak sah.\n"
+        "Sila cuba lagi."
     )
 
 # ======================
