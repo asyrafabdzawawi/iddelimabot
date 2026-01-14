@@ -14,7 +14,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 # ======================
 # TELEGRAM BOT TOKEN
 # ======================
-TOKEN = os.environ["7761335776:AAH77sm6Vm0hJM-C3H4C9E2HKvce4TeNVbA"]
+TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 
 # ======================
 # GOOGLE SHEETS AUTH
@@ -24,18 +24,16 @@ scope = [
     "https://www.googleapis.com/auth/drive"
 ]
 
-# Ambil Google Service Account dari ENV
 service_account_info = json.loads(
     os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"]
 )
 
-creds = ServiceAccountCredentials.from_json_keyfile_dict(	
+creds = ServiceAccountCredentials.from_json_keyfile_dict(
     service_account_info, scope
 )
 
 client = gspread.authorize(creds)
 
-# Tukar kepada KEY Google Sheet cikgu
 sheet = client.open_by_key(
     "13H2dd939B_DVphoeYWvdJFCTscgmviG9RPIZS8cankU"
 ).sheet1
@@ -46,7 +44,7 @@ sheet = client.open_by_key(
 user_waiting_pin = set()
 
 # ======================
-# /start COMMAND
+# /start
 # ======================
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_waiting_pin.add(update.effective_user.id)
@@ -79,8 +77,7 @@ async def terima_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
             return
 
     await update.message.reply_text(
-        "❌ PIN tidak sah.\n"
-        "Sila cuba lagi."
+        "❌ PIN tidak sah.\nSila cuba lagi."
     )
 
 # ======================
