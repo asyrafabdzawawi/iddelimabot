@@ -63,18 +63,20 @@ async def terima_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
         return
 
     pin = update.message.text.strip()
-    data = sheet.get_all_records()
+data = sheet.get_all_records()
 
-    for row in data:
-        if str(row["PIN"]).strip() == pin:
-            user_waiting_pin.remove(user_id)
-            await update.message.reply_text(
-                "✅ Pengesahan berjaya\n\n"
-                f"👤 Nama: {row['NAMA MURID']}\n"
-                f"🏫 Kelas: {row['Kelas']}\n"
-                f"📧 ID DELIMa: {row['ID DELIMA']}"
-            )
-            return
+for row in data:
+    sheet_pin = str(row["PIN"]).zfill(4)
+
+    if sheet_pin == pin:
+        user_waiting_pin.remove(user_id)
+        await update.message.reply_text(
+            "✅ Pengesahan berjaya\n\n"
+            f"👤 Nama: {row['NAMA MURID']}\n"
+            f"🏫 Kelas: {row['Kelas']}\n"
+            f"📧 ID DELIMa: {row['ID DELIMA']}"
+        )
+        return
 
     await update.message.reply_text(
         "❌ PIN tidak sah.\nSila cuba lagi."
