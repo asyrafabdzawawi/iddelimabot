@@ -66,7 +66,7 @@ async def terima_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = sheet.get_all_records()
 
     for row in data:
-        if str(row["PIN"]).strip() == pin:
+         if str(row["PIN"]).strip().zfill(len(pin)) == pin:
             user_waiting_pin.remove(user_id)
             await update.message.reply_text(
                 "✅ Pengesahan berjaya\n\n"
