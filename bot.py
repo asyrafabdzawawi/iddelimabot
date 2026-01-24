@@ -126,25 +126,29 @@ async def terima_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
         # ===== PAPAR STAF =====
         if matched_staf:
-            message += "👔 Akaun Staf / Pentadbir\n\n"
+            message += "👔🛡️ Akaun Staf / Pentadbir\n\n"
 
             for row in matched_staf:
                 message += (
-                    f"Nama: {row['NAMA MURID']}\n"
-                    f"Jawatan: {row['KELAS']}\n"
-                    f"ID DELIMa: {row['ID DELIMA']}\n\n"
+                    f"👔 Nama: {row['NAMA MURID']}\n"
+                    f"🧑‍💼 Jawatan: {row['KELAS']}\n"
+                    f"📧 ID DELIMa: {row['ID DELIMA']}\n\n"
                 )
 
-        # ===== NOTIS KONGSI PIN =====
-        if len(matched_murid) > 1:
-            message += (
-                f"⚠️ PIN ini dikongsi oleh {len(matched_murid)} orang murid.\n"
-            )
+        jumlah_pengguna = len(matched_murid) + len(matched_staf)
 
-        if len(matched_staf) > 0:
-            message += (
-                f"⚠️ PIN ini juga digunakan oleh {len(matched_staf)} orang staf / pentadbir."
-            )
+        # ===== NOTIS KONGSI PIN (HANYA JIKA BENAR-BENAR DIKONGSI) =====
+        if jumlah_pengguna > 1:
+
+            if len(matched_murid) > 1:
+                message += (
+                    f"⚠️👥 PIN ini dikongsi oleh {len(matched_murid)} orang murid.\n"
+                )
+
+            if len(matched_staf) > 0:
+                message += (
+                    f"⚠️🛡️ PIN ini juga digunakan oleh {len(matched_staf)} orang staf / pentadbir."
+                )
 
         await update.message.reply_text(
             message,
