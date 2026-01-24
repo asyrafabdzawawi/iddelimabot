@@ -96,47 +96,54 @@ async def terima_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     pin = text
     data = sheet.get_all_records()
 
-    matched_rows = []
-    murid_count = 0
-    staf_count = 0
+    matched_murid = []
+    matched_staf = []
 
-    # Cari SEMUA dengan PIN sama (support 0 depan)
+    # Cari SEMUA dengan PIN sama
     for row in data:
         if str(row["PIN"]).strip().zfill(len(pin)) == pin:
 
             kelas = str(row["KELAS"]).strip().upper()
 
-            # Kira staf atau murid
             if kelas in STAF_KELAS:
-                staf_count += 1
+                matched_staf.append(row)
             else:
-                murid_count += 1
-                matched_rows.append(row)
+                matched_murid.append(row)
 
-    # Jika jumpa sekurang-kurangnya murid atau staf
-    if murid_count > 0 or staf_count > 0:
+    # Jika jumpa murid atau staf
+    if matched_murid or matched_staf:
         user_waiting_pin.remove(user_id)
 
         message = "✅ Pengesahan berjaya\n\n"
 
-        # Papar murid sahaja seperti biasa
-        for row in matched_rows:
+        # ===== PAPAR MURID =====
+        for row in matched_murid:
             message += (
                 f"👤 Nama: {row['NAMA MURID']}\n"
                 f"🏫 Kelas: {row['KELAS']}\n"
                 f"📧 ID DELIMa: {row['ID DELIMA']}\n\n"
             )
 
-        # Notis murid kongsi PIN
-        if murid_count > 1:
+        # ===== PAPAR STAF =====
+        if matched_staf:
+            message += "👔 Akaun Staf / Pentadbir\n\n"
+
+            for row in matched_staf:
+                message += (
+                    f"Nama: {row['NAMA MURID']}\n"
+                    f"Jawatan: {row['KELAS']}\n"
+                    f"ID DELIMa: {row['ID DELIMA']}\n\n"
+                )
+
+        # ===== NOTIS KONGSI PIN =====
+        if len(matched_murid) > 1:
             message += (
-                f"⚠️ PIN ini dikongsi oleh {murid_count} orang murid.\n"
+                f"⚠️ PIN ini dikongsi oleh {len(matched_murid)} orang murid.\n"
             )
 
-        # Notis staf kongsi PIN
-        if staf_count > 0:
+        if len(matched_staf) > 0:
             message += (
-                f"⚠️ PIN ini juga digunakan oleh {staf_count} orang staf / pentadbir."
+                f"⚠️ PIN ini juga digunakan oleh {len(matched_staf)} orang staf / pentadbir."
             )
 
         await update.message.reply_text(
