@@ -44,9 +44,9 @@ sheet = client.open_by_key(
 user_waiting_pin = set()
 
 # ======================
-# KELAS / JAWATAN YANG TIDAK DIPAPAR
+# SENARAI KELAS / JAWATAN STAF
 # ======================
-EXCLUDE_KELAS = [
+STAF_KELAS = [
     "GURU BESAR",
     "PK PENTADBIRAN",
     "PK HEM",
@@ -97,24 +97,29 @@ async def terima_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
     data = sheet.get_all_records()
 
     matched_rows = []
+    murid_count = 0
+    staf_count = 0
 
-    # Cari SEMUA murid dengan PIN sama (support 0 depan)
+    # Cari SEMUA dengan PIN sama (support 0 depan)
     for row in data:
-        kelas = str(row["KELAS"]).strip().upper()
-
-        # Skip jika jawatan / staf
-        if kelas in EXCLUDE_KELAS:
-            continue
-
         if str(row["PIN"]).strip().zfill(len(pin)) == pin:
-            matched_rows.append(row)
 
-    # Jika jumpa
-    if matched_rows:
+            kelas = str(row["KELAS"]).strip().upper()
+
+            # Kira staf atau murid
+            if kelas in STAF_KELAS:
+                staf_count += 1
+            else:
+                murid_count += 1
+                matched_rows.append(row)
+
+    # Jika jumpa sekurang-kurangnya murid atau staf
+    if murid_count > 0 or staf_count > 0:
         user_waiting_pin.remove(user_id)
 
         message = "✅ Pengesahan berjaya\n\n"
 
+        # Papar murid sahaja seperti biasa
         for row in matched_rows:
             message += (
                 f"👤 Nama: {row['NAMA MURID']}\n"
@@ -122,9 +127,16 @@ async def terima_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
                 f"📧 ID DELIMa: {row['ID DELIMA']}\n\n"
             )
 
-        if len(matched_rows) > 1:
+        # Notis murid kongsi PIN
+        if murid_count > 1:
             message += (
-                f"⚠️ PIN ini dikongsi oleh {len(matched_rows)} orang murid."
+                f"⚠️ PIN ini dikongsi oleh {murid_count} orang murid.\n"
+            )
+
+        # Notis staf kongsi PIN
+        if staf_count > 0:
+            message += (
+                f"⚠️ PIN ini juga digunakan oleh {staf_count} orang staf / pentadbir."
             )
 
         await update.message.reply_text(
@@ -133,7 +145,7 @@ async def terima_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
         )
         return
 
-    # Jika PIN tidak sah
+    # Jika PIN tidak sah langsung
     await update.message.reply_text(
         "❌ PIN tidak sah.\nSila cuba lagi.",
         reply_markup=start_keyboard
