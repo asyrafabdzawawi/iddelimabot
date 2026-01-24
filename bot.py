@@ -44,6 +44,17 @@ sheet = client.open_by_key(
 user_waiting_pin = set()
 
 # ======================
+# KELAS / JAWATAN YANG TIDAK DIPAPAR
+# ======================
+EXCLUDE_KELAS = [
+    "GURU BESAR",
+    "PK PENTADBIRAN",
+    "PK HEM",
+    "PK KOKURIKULUM",
+    "STAF"
+]
+
+# ======================
 # KEYBOARD BUTTON
 # ======================
 start_keyboard = ReplyKeyboardMarkup(
@@ -89,6 +100,12 @@ async def terima_pin(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Cari SEMUA murid dengan PIN sama (support 0 depan)
     for row in data:
+        kelas = str(row["KELAS"]).strip().upper()
+
+        # Skip jika jawatan / staf
+        if kelas in EXCLUDE_KELAS:
+            continue
+
         if str(row["PIN"]).strip().zfill(len(pin)) == pin:
             matched_rows.append(row)
 
